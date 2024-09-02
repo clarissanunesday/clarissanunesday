@@ -1,0 +1,23 @@
+
+### **2. `.gitignore`**
+
+Crie um arquivo chamado `.gitignore` para garantir que arquivos e diretórios indesejados não sejam incluídos no controle de versão. Aqui está um exemplo básico para um projeto de banco de dados SQL:
+
+```gitignore
+# Ignorar arquivos de banco de dados locais
+*.sql
+
+# Ignorar arquivos de configuração local
+config/
+
+# Ignorar logs e arquivos temporários
+*.log
+*.tmp
+
+# Ignorar diretórios de compilação (se aplicável)
+build/
+dist/
+
+# Ignorar arquivos de sistema
+.DS_Store
+Thumbs.db
