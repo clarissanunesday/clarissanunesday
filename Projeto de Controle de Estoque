@@ -1,0 +1,112 @@
+-- Passo 1: Criar o banco de dados
+DROP DATABASE IF EXISTS SistemaControleEstoque;
+CREATE DATABASE SistemaControleEstoque;
+USE SistemaControleEstoque;
+
+-- Passo 2: Criar a tabela de Fornecedores
+CREATE TABLE Fornecedores (
+    FornecedorID INT AUTO_INCREMENT PRIMARY KEY,
+    NomeFornecedor VARCHAR(100) NOT NULL,
+    CNPJ VARCHAR(18) UNIQUE,
+    Telefone VARCHAR(15),
+    Endereco VARCHAR(255)
+);
+
+-- Passo 3: Criar a tabela de Produtos
+CREATE TABLE Produtos (
+    ProdutoID INT AUTO_INCREMENT PRIMARY KEY,
+    NomeProduto VARCHAR(100) NOT NULL,
+    QuantidadeEstoque INT NOT NULL,
+    PrecoUnitario DECIMAL(10, 2),
+    FornecedorID INT,
+    FOREIGN KEY (FornecedorID) REFERENCES Fornecedores(FornecedorID) ON DELETE SET NULL
+);
+
+-- Passo 4: Criar a tabela de Pedidos de Reposição
+CREATE TABLE PedidosReposicao (
+    PedidoID INT AUTO_INCREMENT PRIMARY KEY,
+    ProdutoID INT,
+    QuantidadeSolicitada INT NOT NULL,
+    DataPedido DATE NOT NULL,
+    DataEntrega DATE,
+    FOREIGN KEY (ProdutoID) REFERENCES Produtos(ProdutoID) ON DELETE CASCADE
+);
+
+-- Passo 5: Inserir dados na tabela de Fornecedores
+INSERT INTO Fornecedores (NomeFornecedor, CNPJ, Telefone, Endereco) VALUES
+('Fornecedor A', '12.345.678/0001-90', '1111-1111', 'Rua A, 123, São Paulo, SP'),
+('Fornecedor B', '98.765.432/0001-00', '2222-2222', 'Av. B, 456, Rio de Janeiro, RJ'),
+('Fornecedor C', '11.223.344/0001-11', '3333-3333', 'Rua C, 789, Belo Horizonte, MG');
+
+-- Passo 6: Inserir dados na tabela de Produtos
+INSERT INTO Produtos (NomeProduto, QuantidadeEstoque, PrecoUnitario, FornecedorID) VALUES
+('Produto X', 100, 10.50, 1),
+('Produto Y', 50, 20.75, 2),
+('Produto Z', 30, 15.00, 3);
+
+-- Passo 7: Inserir dados na tabela de Pedidos de Reposição
+INSERT INTO PedidosReposicao (ProdutoID, QuantidadeSolicitada, DataPedido, DataEntrega) VALUES
+(1, 50, '2024-08-01', NULL),
+(2, 20, '2024-08-10', '2024-08-15'),
+(3, 10, '2024-08-12', NULL);
+
+-- Consultas e Relatórios
+
+-- Consulta 1: Verificar produtos em estoque
+SELECT * FROM Produtos;
+
+-- Consulta 2: Verificar pedidos de reposição feitos
+SELECT 
+    p.NomeProduto, 
+    pr.QuantidadeSolicitada, 
+    pr.DataPedido, 
+    pr.DataEntrega 
+FROM PedidosReposicao pr
+JOIN Produtos p ON pr.ProdutoID = p.ProdutoID;
+
+-- Consulta 3: Informações sobre os fornecedores
+SELECT * FROM Fornecedores;
+
+-- Consulta 4: Produtos e seus fornecedores
+SELECT 
+    p.NomeProduto, 
+    f.NomeFornecedor, 
+    p.QuantidadeEstoque 
+FROM Produtos p
+JOIN Fornecedores f ON p.FornecedorID = f.FornecedorID;
+
+-- Atualização de Dados
+
+-- Atualizar a quantidade de produtos em estoque após receber um pedido de reposição (por exemplo, ProdutoID = 1)
+UPDATE Produtos 
+SET QuantidadeEstoque = QuantidadeEstoque + 50 
+WHERE ProdutoID = 1;
+
+-- Atualizar informações de um fornecedor (por exemplo, FornecedorID = 1)
+UPDATE Fornecedores 
+SET Telefone = '4444-4444' 
+WHERE FornecedorID = 1;
+
+-- Deleção de Dados
+
+-- Excluir um produto (por exemplo, ProdutoID = 3)
+-- Primeiro, remover pedidos de reposição associados ao produto
+DELETE FROM PedidosReposicao 
+WHERE ProdutoID = 3;
+
+-- Em seguida, remover o produto
+DELETE FROM Produtos 
+WHERE ProdutoID = 3;
+
+-- Excluir um fornecedor (por exemplo, FornecedorID = 2)
+-- Primeiro, verificar se o fornecedor está associado a algum produto
+-- A cláusula ON DELETE SET NULL na tabela Produtos garante que, ao excluir um fornecedor, o campo FornecedorID nos produtos será definido como NULL.
+-- O fornecedor será excluído somente se não houver produtos associados a ele.
+
+-- Remover fornecedor se não houver produtos associados
+DELETE FROM Fornecedores 
+WHERE FornecedorID = 2 AND NOT EXISTS (
+    SELECT 1 
+    FROM Produtos 
+    WHERE FornecedorID = 2
+);
