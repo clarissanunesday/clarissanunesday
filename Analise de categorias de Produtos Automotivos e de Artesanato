@@ -1,0 +1,47 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Configuração do estilo dos gráficos
+sns.set(style="whitegrid")
+
+# Carregar os dados
+data_url = 'https://drive.google.com/uc?export=download&id=1JE4-gKKgr7abGKgq3fQFz7lloK5x3Qi1'
+try:
+    df = pd.read_csv(data_url)
+    print("Dados carregados com sucesso!")
+except Exception as e:
+    print(f"Erro ao carregar os dados: {e}")
+
+# Visualizar as primeiras linhas do DataFrame
+print(df.head())
+
+# Limpeza de Dados
+# Verificar duplicatas e valores ausentes
+df = df.drop_duplicates()
+df = df.dropna()
+
+# Separar as categorias de Artesanato e Automotiva
+artesanato = df[df['category_name'].str.contains('Craft|Sewing|Beading|Scrapbooking|Painting|Decorating', case=False, na=False)]
+automotiva = df[df['category_name'].str.contains('Automotive', case=False, na=False)]
+
+# Análise e Visualização dos Dados
+
+
+# 2. Gráfico de Pizza: Proporção das categorias dentro de cada indústria
+def plot_pie_chart(data, title):
+    plt.figure(figsize=(8, 8))
+    category_counts = data['category_name'].value_counts()
+    plt.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=140, colors=sns.color_palette('viridis', len(category_counts)))
+    plt.title(title)
+    plt.show()
+
+plot_pie_chart(artesanato, 'Proporção das Categorias de Artesanato')
+plot_pie_chart(automotiva, 'Proporção das Categorias Automotivas')
+
+
+# 4. Gráfico de Linha: Tendência de popularidade das categorias ao longo do tempo
+# Este gráfico será removido porque não temos dados temporais disponíveis.
+
+# 5. Gráfico de Dispersão: Correlações (caso tenha mais atributos, como preço)
+# Este gráfico será removido porque não temos atributos adicionais como preço disponíveis.
