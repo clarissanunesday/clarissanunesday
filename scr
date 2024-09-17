@@ -1,0 +1,65 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Carregar dados
+df = pd.read_csv('trend_over_time.csv', parse_dates=['Week'], index_col='Week')
+
+# Plotar as séries temporais para visualização inicial
+plt.figure(figsize=(14, 8))
+for lang in ['Python', 'Java', 'C++']:
+    plt.plot(df.index, df[lang], label=lang)
+plt.title('Popularidade das Linguagens de Programação (Abril 2019 - Abril 2024)')
+plt.xlabel('Data')
+plt.ylabel('Popularidade')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Função para suavização usando médias móveis
+def moving_average(series, window_size):
+    return series.rolling(window=window_size, center=True).mean()
+
+# Aplicar médias móveis para suavizar as séries
+window_size_short = 4  # Média móvel de curto prazo
+window_size_long = 16  # Média móvel de longo prazo
+
+plt.figure(figsize=(14, 8))
+for lang in ['Python', 'Java', 'C++']:
+    plt.plot(df.index, df[lang], label=f'{lang} - Original')
+    plt.plot(df.index, moving_average(df[lang], window_size_short), label=f'{lang} - Média Móvel {window_size_short} Semanas')
+    plt.plot(df.index, moving_average(df[lang], window_size_long), label=f'{lang} - Média Móvel {window_size_long} Semanas')
+plt.title('Popularidade das Linguagens de Programação com Médias Móveis')
+plt.xlabel('Data')
+plt.ylabel('Popularidade')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Calculando e exibindo a média mensal para análise sazonal
+df_monthly = df.resample('M').mean()
+
+plt.figure(figsize=(14, 8))
+for lang in ['Python', 'Java', 'C++']:
+    plt.plot(df_monthly.index, df_monthly[lang], label=lang)
+plt.title('Popularidade Mensal das Linguagens de Programação')
+plt.xlabel('Data')
+plt.ylabel('Popularidade Média Mensal')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Comparação por estação do ano
+def add_seasonal_columns(df):
+    df['Year'] = df.index.year
+    df['Month'] = df.index.month
+    df['Season'] = df['Month'].map({
+        1: 'Inverno', 2: 'Inverno', 3: 'Primavera', 4: 'Primavera', 5: 'Primavera',
+        6: 'Verão', 7: 'Verão', 8: 'Verão', 9: 'Outono', 10: 'Outono', 11: 'Outono', 12: 'Inverno'
+    })
+    return df
+
+df_seasonal = add_seasonal_columns(df)
+seasonal_stats = df_seasonal.groupby(['Season']).mean()
+
+print(seasonal_stats)
